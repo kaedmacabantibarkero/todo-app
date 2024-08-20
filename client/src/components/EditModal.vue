@@ -39,8 +39,12 @@
       <option>In progress</option>
       <option>Done</option>
     </select>
-    <footer class="flex justify-end mt-[20px] gap-[1rem]"> 
-        <button class="h-[32px] w-[128px] bg-red-500 text-white rounded-[5px]">Save changes</button>
+    <footer class="flex justify-end mt-[20px] gap-[1rem] items-center"> 
+        <button class="h-[32px] w-[128px] bg-red-500 text-white rounded-[5px]">
+          Save changes
+  
+        </button>
+        <Loading/>
     </footer>
   </div>
   
@@ -49,6 +53,7 @@
 <script setup>
 import { ref, watch, defineEmits } from "vue";
 
+import Loading from '../components/Loading.vue'
 // Define props
 const props = defineProps({
   title: {

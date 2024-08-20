@@ -19,7 +19,7 @@ function showAddTaskModal() {
         </router-link>
 
         <br>
-        <router-link class="menu-item max-h-[32px]" :to="`/products`">
+        <router-link class="menu-item max-h-[32px]" :to="`/`">
             <i class="fa-solid fa-list-check"></i>
             <label>List</label>
         </router-link>

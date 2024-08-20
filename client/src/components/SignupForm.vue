@@ -1,12 +1,64 @@
+<script setup>
+import { ref, computed } from 'vue';
+import axios from 'axios';
+
+const username = ref('');
+const password = ref('');
+const passwordVisible = ref(false);
+
+// Check conditions for the password
+const isMinLength = computed(() => password.value.length >= 8);
+const hasLowerCase = computed(() => /[a-z]/.test(password.value));
+const hasUpperCase = computed(() => /[A-Z]/.test(password.value));
+const hasNumber = computed(() => /\d/.test(password.value));
+const hasSpecialChar = computed(() => /[!@#$%^&*]/.test(password.value));
+
+// Check if at least 3 conditions are met
+const isValidThreeConditions = computed(() => {
+  let conditionsMet = 0;
+  if (hasLowerCase.value) conditionsMet++;
+  if (hasUpperCase.value) conditionsMet++;
+  if (hasNumber.value) conditionsMet++;
+  if (hasSpecialChar.value) conditionsMet++;
+  return conditionsMet >= 3;
+});
+
+const hasPassword = computed(() => password.value.length > 0);
+
+// Function to toggle password visibility
+const togglePasswordVisibility = () => {
+  passwordVisible.value = !passwordVisible.value;
+};
+
+// Function to handle sign up
+const signUp = async () => {
+  if (isMinLength.value && isValidThreeConditions.value) {
+    try {
+      const response = await axios.post('http://localhost:3000/api/post/signup', {
+        username: username.value,
+        password: password.value,
+      });
+      alert("Success");
+      console.log(response.data);
+    } catch (error) {
+      alert("Error occurred: " + error.message);
+    }
+  } else {
+    alert("Password does not meet the guidelines");
+  }
+};
+</script>
+
+
 <template>
-  <div :class="[hasPassword ? 'h-[760px]' : 'h-[540px]']" class="w-[400px] bg-white fading-box-shadow ">
+  <div :class="[hasPassword ? 'h-[760px]' : 'h-[540px]']" class="h-[540px] w-[400px] bg-white fading-box-shadow">
     <div class="w-full h-[200px] p-[40px] flex flex-col items-center justify-center gap-[1rem]">
       <img class="h-[80px] mt-[4rem]" src="../assets/todoist.jpg" alt="">
       <h2 class="text-[25px]">Welcome</h2>
     </div>
     <div class="w-full h-full flex flex-col p-[40px]">
       <div class="flex flex-col gap-[1rem]">
-        <input
+        <input v-model="username"
           class="border border-[#686868] h-[52px] px-[16px]"
           placeholder="Email address*"
           type="text"
@@ -43,54 +95,16 @@
           </ul>
         </div>
       </div>
-      <button @click="checkPassword" class="h-[52px] px-[16px] bg-black text-white mt-[24px]">Continue</button>
+      <button @click="signUp" class="h-[52px] px-[16px] bg-black text-white mt-[24px]">Continue</button>
       <span class="flex gap-[.5rem] mt-[1rem]">
         <p>Already have an account?</p>
-        <p class="text-[#047cb0] font-medium">Log in</p>
+        <router-link to="/login" class="text-[#047cb0] font-medium">
+          Log in
+        </router-link>
       </span>
     </div>
   </div>
 </template>
-
-<script setup>
-import { ref, computed } from 'vue';
-
-const password = ref('');
-const passwordVisible = ref(false);
-
-// Check conditions for the password
-const isMinLength = computed(() => password.value.length >= 8);
-const hasLowerCase = computed(() => /[a-z]/.test(password.value));
-const hasUpperCase = computed(() => /[A-Z]/.test(password.value));
-const hasNumber = computed(() => /\d/.test(password.value));
-const hasSpecialChar = computed(() => /[!@#$%^&*]/.test(password.value));
-
-// Check if at least 3 conditions are met
-const isValidThreeConditions = computed(() => {
-  let conditionsMet = 0;
-  if (hasLowerCase.value) conditionsMet++;
-  if (hasUpperCase.value) conditionsMet++;
-  if (hasNumber.value) conditionsMet++;
-  if (hasSpecialChar.value) conditionsMet++;
-  return conditionsMet >= 3;
-});
-
-const hasPassword = computed(() => password.value.length > 0);
-
-// Function to toggle password visibility
-const togglePasswordVisibility = () => {
-  passwordVisible.value = !passwordVisible.value;
-};
-
-// Function to check if the password satisfies all conditions
-const checkPassword = () => {
-  if (isMinLength.value && isValidThreeConditions.value) {
-    alert("Success");
-  } else {
-    alert("Password does not meet the guidelines");
-  }
-};
-</script>
 
 <style scoped>
 .text-green-600 {

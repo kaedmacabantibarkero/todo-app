@@ -2,7 +2,7 @@
 import Table from '../components/Table.vue'
 import Sidenav from '../components/Sidenav.vue' 
 import AddTaskModal from '../components/AddTaskModal.vue'
-import Topnav from '../components/Topnav.vue'
+import Topnav from '../components/Topnav.vue' 
 import { ref } from 'vue'
 
 const showAddTaskModal = ref(false)
