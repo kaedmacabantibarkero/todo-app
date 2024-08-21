@@ -1,6 +1,9 @@
 <script setup>
 import { ref, computed } from 'vue';
 import axios from 'axios';
+import {useRouter} from 'vue-router'
+
+const router = useRouter()
 
 const username = ref('');
 const password = ref('');
@@ -30,6 +33,8 @@ const togglePasswordVisibility = () => {
   passwordVisible.value = !passwordVisible.value;
 };
 
+const errorMessage = ref("Please fill out email and password")
+const showErrorMessage = ref(false)
 // Function to handle sign up
 const signUp = async () => {
   if (isMinLength.value && isValidThreeConditions.value) {
@@ -37,31 +42,50 @@ const signUp = async () => {
       const response = await axios.post('http://localhost:3000/api/post/signup', {
         username: username.value,
         password: password.value,
+      }); 
+      router.push({
+        name: 'home',
+        params: {
+          id: '123'
+        }
       });
-      alert("Success");
-      console.log(response.data);
     } catch (error) {
-      alert("Error occurred: " + error.message);
+      // Check if the error has a response from the server
+      if (error.response && error.response.data) { 
+        showErrorMessage.value= true
+        errorMessage.value = error.response.data.msg;
+        setTimeout(() => {
+          showErrorMessage.value = false;
+        }, 3000);
+      } else { 
+        console.log("Error occurred: " + error.message);
+      }
     }
   } else {
-    alert("Password does not meet the guidelines");
+    showErrorMessage.value= true
+    setTimeout(() => {
+      showErrorMessage.value = false;
+    }, 3000);
   }
 };
 </script>
 
 
 <template>
-  <div :class="[hasPassword ? 'h-[760px]' : 'h-[540px]']" class="h-[540px] w-[400px] bg-white fading-box-shadow">
+  <div :class="[hasPassword ? 'h-[760px]' : 'h-[540px]']" class="h-[540px] w-[400px] bg-white default:box-shadow-none sm-tablet:shadow-fading">
     <div class="w-full h-[200px] p-[40px] flex flex-col items-center justify-center gap-[1rem]">
-      <img class="h-[80px] mt-[4rem]" src="../assets/todoist.jpg" alt="">
-      <h2 class="text-[25px]">Welcome</h2>
+      <img class="h-[80px] mt-[4rem]" src="../assets/Todoist_logo.png" alt="">
+      <h2 class="text-[25px]">Sign up new account</h2>
     </div>
-    <div class="w-full h-full flex flex-col p-[40px]">
+    <div :class="[showErrorMessage ? 'p-[40px] pb-[40px] pt-[20px]': 'p-[40px]']" class="w-full h-full flex flex-col">
+      
       <div class="flex flex-col gap-[1rem]">
+        <span v-if="showErrorMessage" class="bg-yellow-400 text-white px-[1rem] py-[.5rem]"> {{errorMessage}}</span>
         <input v-model="username"
           class="border border-[#686868] h-[52px] px-[16px]"
           placeholder="Email address*"
           type="text"
+          @keyup.enter="signUp"
         />
         <div class="relative">
           <input
@@ -69,6 +93,7 @@ const signUp = async () => {
             :type="passwordVisible ? 'text' : 'password'"
             class="border border-[#686868] h-[52px] px-[16px] w-full pr-10"
             placeholder="Password*"
+            @keyup.enter="signUp"
           />
           <button type="button" @click="togglePasswordVisibility" class="absolute inset-y-0 right-0 pr-3 flex items-center text-gray-600">
             <svg v-if="passwordVisible" xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -95,7 +120,7 @@ const signUp = async () => {
           </ul>
         </div>
       </div>
-      <button @click="signUp" class="h-[52px] px-[16px] bg-black text-white mt-[24px]">Continue</button>
+      <button @click="signUp" class="h-[52px] px-[16px] bg-[#e04c3c] hover:bg-[#c83c2c] text-white mt-[24px]">Continue</button>
       <span class="flex gap-[.5rem] mt-[1rem]">
         <p>Already have an account?</p>
         <router-link to="/login" class="text-[#047cb0] font-medium">
@@ -115,12 +140,5 @@ const signUp = async () => {
   color: #4B5563; /* Tailwind gray-600 */
 }
 
-.fading-box-shadow {
-  box-shadow: 
-  0 0 20px rgba(0, 0, 0, 0.08), 
-  0 0 40px rgba(0, 0, 0, 0.03),
-  0 0 60px rgba(0, 0, 0, 0.02), 
-  0 0 80px rgba(0, 0, 0, 0.01);
-}
-
+ 
 </style>

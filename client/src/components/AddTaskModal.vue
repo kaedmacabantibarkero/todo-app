@@ -35,7 +35,7 @@ const addTask = async () => {
   <div class="w-full h-[100vh] bg-gray-500 bg-opacity-50 absolute top-0 flex items-center justify-center">
     <div class="w-full max-w-[850px] h-full max-h-[500px] border bg-white my-[2rem] rounded-[10px] p-[20px]">
       <div class="header w-full flex justify-between items-center border-b pb-[12px]">
-        <span class="text-[#484849]"><i class="fa-solid fa-pen text-sm"></i> Add task</span>
+        <span class="text-[#484849]"><i class="fa-regular fa-pen-to-square px-[.2rem]"></i> Add task</span>
         <i class="fa-solid fa-xmark cursor-pointer" @click="closeModal"></i>
       </div>
       <div class="flex flex-col">
@@ -54,7 +54,7 @@ const addTask = async () => {
           rows="6"
           placeholder="Agenda description"
         ></textarea>
-        <span>Deadline</span>
+        <span class="pb-[.4rem]">Deadline</span>
         <input 
           v-model="deadline"
           type="date" 
@@ -62,8 +62,8 @@ const addTask = async () => {
           placeholder="Pick a date"
         />
       </div>
-      <footer class="flex justify-end mt-[20px] gap-[1rem]"> 
-        <button @click="addTask" class="h-[32px] w-[128px] bg-red-500 text-white rounded-[5px]">Add task</button>
+      <footer class="flex justify-end mt-[20px] gap-[1rem] "> 
+        <button @click="addTask" class="h-[32px] px-[1rem] text-white rounded-[5px] bg-[#e04c3c] hover:bg-[#c83c2c]">Add task</button>
       </footer>
     </div>
   </div>

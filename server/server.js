@@ -6,6 +6,10 @@ const app = express()
 app.use(express.json()) 
 const bodyParser = require('body-parser');
 
+require('dotenv').config()
+const jwt = require('jsonwebtoken')
+ 
+
 const getRoute = require("./api/get")
 const putRoute = require("./api/put")
 const postRoute = require("./api/post") 

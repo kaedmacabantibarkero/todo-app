@@ -5,48 +5,28 @@ const MongoClient = require('mongodb').MongoClient;
 const mongoURI = process.env.MONGODB_CONNECT_URI;
 const client = new MongoClient(mongoURI);
 
-//updateAccount
-router.put('/api/updateAccount', async (req, res) => {
+const Task = require('../models/task');
+// PUT endpoint to update a task
+router.put('/api/put/updateTask/:id', async (req, res) => {
   try {
-    await client.connect();
-    const db = client.db('Admin_Account');
-    const collection = db.collection('account');
+    const { id } = req.params; // Get task ID from URL parameters
+    const { taskTitle, taskDescription, deadline, status, user: userId } = req.body;
 
-    const currentEmail = req.body.currentEmail;
-    const newEmail = req.body.newEmail;
-    const confirmemail = req.body.confirmemail;
-    const currentPassword = req.body.currentPassword;
-    const newPass = req.body.newPass;
-    const confirmpass = req.body.confirmpass;
+    // Find the task by ID and update it
+    const updatedTask = await Task.findByIdAndUpdate(
+      id,
+      { taskTitle, taskDescription, deadline, status, user: userId },
+      { new: true, runValidators: true } // Return the updated task and run validation
+    );
 
-    const existingAccount = await collection.findOne({ email: currentEmail });
-
-    if (!existingAccount || existingAccount.password !== currentPassword) {
-      return res.status(401).json({ error: 'Invalid email or password' });
+    if (!updatedTask) {
+      return res.status(404).json({ msg: 'Task not found' });
     }
 
-    if (newPass && newPass.trim() !== '') {
-      if (newPass === confirmpass) {
-        await collection.updateOne(
-          { email: currentEmail },
-          { $set: { password: newPass } }
-        );
-      } else {
-        return res.status(400).json({ error: 'New password and confirmation do not match' });
-      }
-    }
-
-    if (newEmail && newEmail.trim() !== '' && confirmemail === newEmail) {
-      await collection.updateOne(
-        { email: currentEmail },
-        { $set: { email: newEmail } }
-      );
-    }
-
-    res.json({ message: 'Account updated successfully' });
-  } catch (error) {
-    console.error('Error updating account in MongoDB:', error);
-    res.status(500).json({ error: 'Internal server error' });
+    res.status(200).json({ msg: 'Task updated successfully', task: updatedTask });
+  } catch (err) {
+    console.error(err.message);
+    res.status(500).send('Server error');
   }
 });
 

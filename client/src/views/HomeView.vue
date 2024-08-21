@@ -3,9 +3,19 @@ import Table from '../components/Table.vue'
 import Sidenav from '../components/Sidenav.vue' 
 import AddTaskModal from '../components/AddTaskModal.vue'
 import Topnav from '../components/Topnav.vue' 
-import { ref } from 'vue'
+import { ref, onMounted } from 'vue'
+import { useRoute } from 'vue-router'
 
 const showAddTaskModal = ref(false)
+
+// Get the route object
+const route = useRoute();
+
+// Function to log the userId
+onMounted(() => {
+  const userId = route.params.id;
+  console.log("User ID:", userId); // Log the userId here
+});
 
 function handleToggleAddTaskModal(visible) {
   showAddTaskModal.value = visible
@@ -20,7 +30,7 @@ function handleCloseModal() {
   <main class="relative overflow-y-auto h-[full]">
     <Topnav/>
     <Sidenav @toggleAddTaskModal="handleToggleAddTaskModal" />
-    <div class="section ml-[20rem] mt-[4rem] relative">
+    <div class="section tablet:ml-[15rem] default:ml-[0rem] mt-[4rem] relative">
       <Table />
     </div>
   </main>
