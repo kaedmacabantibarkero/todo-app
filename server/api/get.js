@@ -1,42 +1,13 @@
 const express = require('express');
 const router = express.Router();
-const Task = require('../models/task'); // Adjust the path as needed
-const bcrypt = require('bcryptjs');
+const Task = require('../models/task'); 
 const jwt = require('jsonwebtoken')
- 
-
-const posts = [
-  {
-    userId: '66c43a572a607f077c59e31f',
-    title: 'Post 1'
-  },
-  {
-    userId: 'Jim',
-    title: 'Post 2'
-  }
-]
-
-router.get('/posts', authenticateToken, (req, res) => {
-  res.json(posts.filter(post => post.userId === req.user.userId))
-})
-
-function authenticateToken(req, res, next) {
-  const authHeader = req.headers['authorization']
-  const token = authHeader && authHeader.split(' ')[1]
-  if (token == null) return res.sendStatus(401)
-
-  jwt.verify(token, process.env.ACCESS_TOKEN_SECRET, (err, user) => {
-    console.log(err)
-    if (err) return res.sendStatus(403)
-    req.user = user
-    next()
-  })
-}
+const authenticateToken = require('../middleware/authMiddleware');
 
 // GET endpoint to fetch all tasks for a specific user
-router.get('/api/get/getTask', async (req, res) => {
+router.get('/api/get/getTask', authenticateToken, async(req, res) => {
   try {
-    const userId = req.params.userId.trim(); // Ensure no extra whitespace
+    const userId = req.user.userId
 
     // Check if userId is valid
     if (!userId.match(/^[0-9a-fA-F]{24}$/)) {

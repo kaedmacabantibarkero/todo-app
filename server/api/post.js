@@ -4,7 +4,8 @@ const User = require('../models/user');
 const Task = require('../models/task');
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken')
- 
+ const authenticateToken = require('../middleware/authMiddleware');
+
 // POST endpoint to create a new user
 router.post('/api/post/signup', async (req, res) => {
   try {
@@ -78,10 +79,10 @@ router.post('/api/post/login', async (req, res) => {
 });
 
 
-// POST endpoint to create task
-router.post('/api/post/addTask', async (req, res) => {
+router.post('/api/post/addTask', authenticateToken, async (req, res) => {
   try {
-    const { taskTitle, taskDescription, deadline, status, user: userId } = req.body;
+ 
+    const { taskTitle, taskDescription, deadline, status, user} = req.body;
 
     // Create a new task
     const task = new Task({
@@ -89,15 +90,16 @@ router.post('/api/post/addTask', async (req, res) => {
       taskDescription,
       deadline,
       status,
-      user: userId  // Ensure this is the user ID
+      user 
     });
 
     await task.save();
     res.status(201).json({ msg: 'Task created successfully' });
   } catch (err) {
-    console.error(err.message);
+    console.error('Error:', err.message);
     res.status(500).send('Server error');
   }
 });
+
 
 module.exports = router;
