@@ -3,19 +3,19 @@
 import axios from 'axios';
 import { ref, onMounted, computed } from 'vue';
 import EditModal from '../components/EditModal.vue';
-
+ 
 const showEditModal = ref(false);
+const modalId= ref("")
 const modalTitle = ref("");
 const modalTaskDescription = ref("");
 const modalDate = ref("");
 const modalStatus = ref("");
 
- 
-
 // Method to select a task and show the modal
-function selectTask(title, description, date, status) {
+function selectTask(id, title, description, date, status) {
   showEditModal.value = true;
   if (title && date && status) { 
+    modalId.value = id
     modalTitle.value = title;
     modalTaskDescription.value = description;
     modalDate.value = date;
@@ -30,28 +30,23 @@ const tableData = ref([]);
 
 // Function to fetch tasks from the API
 const getTask = async () => {
-      try {
-        const userId = '66c43a572a607f077c59e31f'; // Example user ID
-        const token = localStorage.getItem('accessToken'); // Get the token from localStorage
-        console.log(token)
-        if (!token) {
-          throw new Error('No token found. Please log in.');
-        }
+  try {
+    const token = localStorage.getItem('accessToken'); // Get the token from localStorage
 
-        const response = await axios.get(`http://localhost:3000/api/get/getTask/${userId}`, {
-          headers: {
-            'x-auth-token': token // Include the token in the request headers
-          }
-        });
+    if (!token) {
+      throw new Error('No token found. Please log in.');
+    }
 
-        tableData.value = response.data.map(task => ({
-          ...task,
-          date: new Date(task.deadline).toLocaleDateString() // Format the date
-        }));
-      } catch (error) {
-        console.error('Error fetching tasks:', error);
-      }
-    };
+    const response = await axios.get(`http://localhost:3000/api/get/getTask`, {
+      headers: {'Authorization': `Bearer ${token}`}});
+    tableData.value = response.data.map(task => ({
+      ...task,
+      date: new Date(task.deadline).toLocaleDateString() // Format the date
+    }));
+  } catch (error) {
+    console.error('Error fetching tasks:', error.message);
+  }
+};
 
 // Call getTask when the component is mounted
 onMounted(() => {
@@ -106,7 +101,7 @@ const selectStatus = (status) =>{
 
 <template>
   <div class="container flex flex-col gap-[1rem] default:px-[1rem] sm-tablet:px-[4rem]">
-    <EditModal v-if="showEditModal" :title="modalTitle" :taskDescription="modalTaskDescription" :status="modalStatus" @closeEditModal="showEditModal=false"/>
+    <EditModal v-if="showEditModal" :id="modalId" :title="modalTitle" :taskDescription="modalTaskDescription" :status="modalStatus" @closeEditModal="showEditModal=false"/>
     
     <div class="main-header flex flex justify-between items-center">
       <div class="flex flex-col gap-[1rem]">
@@ -133,7 +128,7 @@ const selectStatus = (status) =>{
       <input type="text" class="search-input" placeholder="Search..." v-model="searchQuery">
     </div>
     <div class="body flex flex-col gap-[1rem]">
-      <div class="row border rounded-[5px] cell flex  justify-between  " v-for="(item, index) in filteredData" :key="index" @click="selectTask(item.taskTitle, item.taskDescription, item.date, item.status)">
+      <div class="row border rounded-[5px] cell flex  justify-between  " v-for="(item, index) in filteredData" :key="index" @click="selectTask(item._id, item.taskTitle, item.taskDescription, item.date, item.status)">
         <div class="flex items-start  gap-[1rem]">
           <input class="my-[.3rem]" type="radio" name="task" :id="`task-${index}`" @change="handleRadioClick(item)" />
           <div class=" ">

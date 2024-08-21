@@ -13,8 +13,7 @@ const route = useRoute();
 
 // Function to log the userId
 onMounted(() => {
-  const userId = route.params.id;
-  console.log("User ID:", userId); // Log the userId here
+  const userId = route.params.id; 
 });
 
 function handleToggleAddTaskModal(visible) {

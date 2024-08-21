@@ -34,7 +34,7 @@
       placeholder="Pick a date"
     />
 
-    <div>Selected: {{ selected }}</div>
+    <div>Selected: {{ selected }} </div>
 
     <select v-model="selected">
       <option disabled value="">Please select one</option>
@@ -54,10 +54,13 @@
 <script setup>
 import axios from "axios";
 import { ref, watch, defineEmits , onMounted } from "vue";
-import Loading from '../components/Loading.vue'
-
+ 
 // Define props
 const props = defineProps({
+  id:{
+    type:String,
+    default:"",
+  },
   title: {
     type: String,
     default: "Title",
@@ -70,9 +73,9 @@ const props = defineProps({
     type: String,
     default: " ",
   },
-});
+ 
+}); 
 
-// Local state variables bound to input fields
 const localTitle = ref(props.title);
 const localTaskDescription = ref(props.taskDescription);
 
@@ -94,16 +97,29 @@ watch(() => props.status, (newStatus) => {
 });
 
  
-// Method to update the task
-const updateTask = async() => {
+const updateTask = async () => {
   try {
-    const response = await axios.put('http://localhost:3000/api/put/updateTask/66c46818715962e3f681abd6', { 
-      taskTitle: localTitle.value,
-      taskDescription: localTaskDescription.value,
-      deadline: "2024-08-20T00:00:00.000+00:00",
-      status: selected.value,
-      user: "66c43a572a607f077c59e31f"
-    });
+    const token = localStorage.getItem('accessToken'); // Get the token from localStorage
+    const userId = localStorage.getItem('userId'); // Get the token from localStorage
+
+    if (!token) {
+      throw new Error('No token found. Please log in.');
+    }
+
+    const response = await axios.put(
+      `http://localhost:3000/api/put/updateTask/${props.id}`, // URL with task ID
+      { // Data payload
+        taskTitle: localTitle.value,
+        taskDescription: localTaskDescription.value,
+        deadline: "2024-08-20T00:00:00.000+00:00",
+        status: selected.value,
+        user: userId 
+      },
+      { // Config object
+        headers: {'Authorization': `Bearer ${token}`}
+      }
+    );
+
     alert("Success update");
     console.log(response.data);
   } catch (error) {

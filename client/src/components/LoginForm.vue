@@ -2,6 +2,8 @@
 import { ref } from 'vue';
 import { useRouter } from 'vue-router';
 import axios from 'axios';
+import { useAuth } from '../composables/useAuth';  
+const { setUserId } = useAuth();
 
 const router = useRouter();
 const username = ref('');
@@ -26,7 +28,8 @@ const login = async () => {
       });
       const { accessToken, userId } = response.data;
       localStorage.setItem('accessToken', accessToken);
-      console.log(localStorage.getItem('accessToken')) 
+      localStorage.setItem('userId', userId);
+      setUserId(userId); 
       router.push({
         name: 'home',
         params: { id: userId }
