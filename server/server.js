@@ -13,6 +13,7 @@ const jwt = require('jsonwebtoken')
 const getRoute = require("./api/get")
 const putRoute = require("./api/put")
 const postRoute = require("./api/post") 
+const authRoute = require('./auth');  // Import the auth routes
 
 const corsOptions = {
   origin: '*', 
@@ -30,6 +31,7 @@ connectDB()
 app.use('/', getRoute)
 app.use('/', putRoute)
 app.use('/', postRoute)
+app.use('/', authRoute);  // Use the auth routes under the "/auth" path
 
  
 

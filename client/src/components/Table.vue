@@ -1,21 +1,26 @@
-<!-- https://dribbble.com/shots/23726833-Jets-Productivity-Website  -->
 <script setup>
 import axios from 'axios';
 import { ref, onMounted, computed } from 'vue';
 import EditModal from '../components/EditModal.vue';
- 
+import AddTaskModal from '../components/AddTaskModal.vue'
+
 const showEditModal = ref(false);
-const modalId= ref("")
+const showAddTaskModal = ref(false);
+const modalId = ref("");
 const modalTitle = ref("");
 const modalTaskDescription = ref("");
 const modalDate = ref("");
 const modalStatus = ref("");
 
+function clickNewTask(){
+  showAddTaskModal.value = true
+}
+
 // Method to select a task and show the modal
 function selectTask(id, title, description, date, status) {
   showEditModal.value = true;
-  if (title && date && status) { 
-    modalId.value = id
+  if (title && date && status) {
+    modalId.value = id;
     modalTitle.value = title;
     modalTaskDescription.value = description;
     modalDate.value = date;
@@ -37,11 +42,12 @@ const getTask = async () => {
       throw new Error('No token found. Please log in.');
     }
 
-    const response = await axios.get(`http://localhost:3000/api/get/getTask`, {
-      headers: {'Authorization': `Bearer ${token}`}});
-    tableData.value = response.data.map(task => ({
+    const response = await axios.get('http://localhost:3000/api/get/getTask', {
+      headers: { 'Authorization': `Bearer ${token}` },
+    });
+    tableData.value = response.data.map((task) => ({
       ...task,
-      date: new Date(task.deadline).toLocaleDateString() // Format the date
+      date: new Date(task.deadline).toLocaleDateString(), // Format the date
     }));
   } catch (error) {
     console.error('Error fetching tasks:', error.message);
@@ -56,14 +62,20 @@ onMounted(() => {
 // Search query
 const searchQuery = ref('');
 
-// Filter data based on search query
+// Filter and sort data based on search query and selected status
 const filteredData = computed(() => {
   const query = searchQuery.value.toLowerCase();
-  return tableData.value.filter(item =>  
+  let filtered = tableData.value.filter((item) =>
     item.taskTitle.toLowerCase().includes(query) ||
     item.date.toLowerCase().includes(query) ||
     item.status.toLowerCase().includes(query)
   );
+
+  if (selectedStatus.value !== 'All') {
+    filtered = filtered.filter(item => item.status === selectedStatus.value);
+  }
+
+  return filtered;
 });
 
 // Return status class based on the status
@@ -91,18 +103,20 @@ const handleRadioClick = (item) => {
   }
 };
 
-const statuses = ["All", "Current", "In progress", "Complete"]
-const selectedStatus = ref("All")
-const selectStatus = (status) =>{
-  selectedStatus.value = status
-}
+const statuses = ['All', 'Not started', 'In progress', 'Done'];
+const selectedStatus = ref('All');
+const selectStatus = (status) => {
+  selectedStatus.value = status;
+};
 </script>
 
 
 <template>
   <div class="container flex flex-col gap-[1rem] default:px-[1rem] sm-tablet:px-[4rem]">
     <EditModal v-if="showEditModal" :id="modalId" :title="modalTitle" :taskDescription="modalTaskDescription" :status="modalStatus" @closeEditModal="showEditModal=false"/>
-    
+    <teleport to="body">
+      <AddTaskModal v-if="showAddTaskModal" @closeAddTaskModal="showAddTaskModal=false" />
+    </teleport>
     <div class="main-header flex flex justify-between items-center">
       <div class="flex flex-col gap-[1rem]">
         <span class="text-[26px] font-medium">Today, 22 April</span>
@@ -119,8 +133,8 @@ const selectStatus = (status) =>{
         </ul>
       </div>
       <div>
-        <button class="default:hidden sm-tablet:block h-[38px] text-white px-[1rem] flex items-center justify-center gap-[.5rem] rounded-[5px] bg-[#e04c3c] hover:bg-[#c83c2c]">
-          <span class="inline-block"><i class="fa-solid fa-plus pr-2"></i>New task</span>
+        <button @click="clickNewTask"  class="default:hidden sm-tablet:block h-[38px] text-white px-[1rem] flex items-center justify-center gap-[.5rem] rounded-[5px] bg-[#e04c3c] hover:bg-[#c83c2c]">
+          <span  class="inline-block"><i class="fa-solid fa-plus pr-2"></i>New task</span>
         </button>
       </div>
     </div>

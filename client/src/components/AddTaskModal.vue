@@ -1,27 +1,30 @@
 <script setup>
 import axios from 'axios'
-import { ref, defineEmits } from 'vue'
+import { ref, defineEmits} from 'vue'
 
-const emit = defineEmits(['close'])
-
-function closeModal() {
-  emit('close')
-}
-
+const emit = defineEmits(['closeAddTaskModal']);
+ 
 const taskTitle = ref("")
 const taskDescription = ref("")
 const deadline = ref("")
 const status = ref("Not started")
 
 const addTask = async () => {
+  const token = localStorage.getItem('accessToken'); // Get the token from localStorage
+  const userId = localStorage.getItem('userId'); // Get the token from localStorage
+
   try {
     const response = await axios.post('http://localhost:3000/api/post/addTask', {
       taskTitle: taskTitle.value,
       taskDescription: taskDescription.value,
       deadline: deadline.value,  // Ensure the date format is YYYY-MM-DD
       status: status.value,
-      user: "66c43a572a607f077c59e31f"  // Replace with actual user ID or get dynamically
-    });
+      user_id: userId  
+    },    
+    {  
+      headers: {'Authorization': `Bearer ${token}`}
+    }
+    );
     alert("Task added successfully");
     console.log(response.data);
     closeModal();  // Close the modal on success
@@ -36,7 +39,7 @@ const addTask = async () => {
     <div class="w-full max-w-[850px] h-full max-h-[500px] border bg-white my-[2rem] rounded-[10px] p-[20px]">
       <div class="header w-full flex justify-between items-center border-b pb-[12px]">
         <span class="text-[#484849]"><i class="fa-regular fa-pen-to-square px-[.2rem]"></i> Add task</span>
-        <i class="fa-solid fa-xmark cursor-pointer" @click="closeModal"></i>
+        <i class="fa-solid fa-xmark cursor-pointer"   @click="$emit('closeAddTaskModal')" ></i>
       </div>
       <div class="flex flex-col">
         <span>Task title</span>

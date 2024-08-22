@@ -22,7 +22,7 @@ const togglePasswordVisibility = () => {
 const login = async () => { 
   if (username.value !== '' && password.value !== '') {
     try {
-      const response = await axios.post('http://localhost:3000/api/post/login', {
+      const response = await axios.post('http://localhost:3000/auth/login', {
         username: username.value,
         password: password.value,
       });

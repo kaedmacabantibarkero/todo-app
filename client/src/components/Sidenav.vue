@@ -1,13 +1,51 @@
  
 
 <script setup>
-import { defineEmits } from 'vue'
+import { ref } from 'vue'; 
+import { useRouter } from 'vue-router';
+import axios from 'axios';
+const router = useRouter();
 
-const emit = defineEmits(['toggleAddTaskModal'])
+const getJWT = async () => {
+  try {
+    const token = localStorage.getItem('accessToken'); // Get the token from localStorage
 
-function showAddTaskModal() {
-  emit('toggleAddTaskModal', true)  // Emit the event with a payload to show the modal
-}
+    if (!token) {
+      throw new Error('No token found. Please log in.');
+    }
+
+    // Fetch the JWT from the endpoint
+    const response = await axios.get('http://localhost:3000/api/get/jwt', {
+      headers: { 'Authorization': `Bearer ${token}` },
+    });
+
+    const jwt = response.data.jwt; // Extract the JWT from the response
+    return jwt;
+  } catch (error) {
+    console.error('Error fetching JWT:', error.message);
+    throw error; // Rethrow the error to handle it in the calling function if needed
+  }
+};
+
+const logout = async () => {
+  try {
+    const jwt = await getJWT(); // Fetch the JWT using getJWT function
+
+    // Send a request to delete the JWT
+    await axios.delete('http://localhost:3000/auth/logout', {
+      headers: { 'Authorization': `Bearer ${jwt}` },
+      data: { jwt }, // Include the JWT in the request body
+    });
+
+    // Optionally, clear the local storage token or handle post-logout behavior
+    localStorage.removeItem('accessToken');
+    router.push({
+        name: 'login', 
+      });
+  } catch (error) {
+    console.error('Error during logout:', error.message);
+  }
+};
 </script>
 <template>
   <section class="sidenav-wrapper bg-[#fcfaf8] fixed flex flex-col h-[100vh] w-[15rem] border-r default:hidden tablet:block ">
@@ -24,17 +62,17 @@ function showAddTaskModal() {
             <label>Task List</label>
         </router-link>
 
-        <div class="menu-item max-h-[32px] cursor-pointer" to="#" id="qsLogoutBtn" @click="showAddTaskModal"  >
-          <i class="fa-solid fa-plus"></i>
-          <label class="cursor-pointer">Add Task</label>
-        </div>
+        <router-link class="menu-item max-h-[32px]" :to="`/`">
+            <i class="fa-solid fa-bullseye"></i>
+            <label>Objectives</label>
+        </router-link>
 
         <div class="menu-item max-h-[32px]" to="#" id="qsLogoutBtn"  >
           <i class="fa-regular fa-calendar"></i>
           <label class="cursor-pointer">Calendar</label>
         </div>
 
-        <div class="menu-item max-h-[32px]" to="#" id="qsLogoutBtn"   >
+        <div @click="logout" class="menu-item max-h-[32px]" to="#" id="qsLogoutBtn"   >
             <i class="fa-solid fa-right-from-bracket"></i>
             <label class="cursor-pointer">Logout</label>
         </div> 
