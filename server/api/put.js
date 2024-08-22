@@ -7,7 +7,6 @@ const client = new MongoClient(mongoURI);
 const Task = require('../models/task');
 const authenticateToken = require('../middleware/authMiddleware');
 
-
 // PUT endpoint to update a task
 router.put('/api/put/updateTask/:id',authenticateToken, async (req, res) => {
   try {
@@ -16,7 +15,7 @@ router.put('/api/put/updateTask/:id',authenticateToken, async (req, res) => {
     const { id } = req.params;
     const { taskTitle, taskDescription, deadline, status, user: userId } = req.body;
 
-    const validStatuses = ['Not started', 'In progress', 'Completed'];
+    const validStatuses = ['Not started', 'In progress', 'Done'];
     if (!validStatuses.includes(status)) {
       return res.status(400).json({ msg: 'Invalid status value' });
     }
@@ -37,7 +36,6 @@ router.put('/api/put/updateTask/:id',authenticateToken, async (req, res) => {
     res.status(500).send('Server error');
   }
 });
-
 
 module.exports = router
   

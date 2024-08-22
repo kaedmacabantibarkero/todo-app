@@ -15,17 +15,17 @@ const TaskSchema = new mongoose.Schema({
   },
   status: {
     type: String,
-    enum: ['Not started', 'In progress', 'Completed'],  // Define possible status values
+    enum: ['Not started', 'In progress', 'Done'],  
     default: 'Not started',
     required: true,
   },
   user_id: {
-    type: mongoose.Schema.Types.ObjectId,  // Reference to the User schema
+    type: mongoose.Schema.Types.ObjectId,  
     ref: 'User',
     required: true,
   }
 }, {
-  timestamps: true  // Optional: adds createdAt and updatedAt timestamps
+  timestamps: true  
 });
 
 module.exports = mongoose.model('Task', TaskSchema);

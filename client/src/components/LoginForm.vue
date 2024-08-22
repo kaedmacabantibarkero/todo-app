@@ -1,10 +1,7 @@
 <script setup>
 import { ref } from 'vue';
 import { useRouter } from 'vue-router';
-import axios from 'axios';
-import { useAuth } from '../composables/useAuth';  
-const { setUserId } = useAuth();
-
+import axios from 'axios'; 
 const router = useRouter();
 const username = ref('');
 const password = ref('');  
@@ -28,8 +25,7 @@ const login = async () => {
       });
       const { accessToken, userId } = response.data;
       localStorage.setItem('accessToken', accessToken);
-      localStorage.setItem('userId', userId);
-      setUserId(userId); 
+      localStorage.setItem('userId', userId); 
       router.push({
         name: 'home',
         params: { id: userId }
@@ -97,3 +93,4 @@ const login = async () => {
     </div>
   </div>
 </template>
+ 

@@ -1,9 +1,13 @@
 GET http://localhost:3000/api/get/getTask
-Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VybmFtZSI6Im15dXNlcm5hbWUiLCJ1c2VySWQiOiI2NmM0M2E1NzJhNjA3ZjA3N2M1OWUzMWYiLCJpYXQiOjE3MjQzMTAyODksImV4cCI6MTcyNDMxMTE4OX0.WoK3FVC0sgbQJm_KhbnDoubrmjO6CpSgWYWi0vaERN0
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VybmFtZSI6ImthZWRtYWNhYmFudGlAZ21haWwuY29tIiwidXNlcklkIjoiNjZjNmY0MmNiOGEzOTYyYzU1OTY1ZDVjIiwiaWF0IjoxNzI0MzE0NjY5LCJleHAiOjE3MjQ0MDEwNjl9.dNwQvklDDI0h-fyAHnYfuWg1JxaflExE5OFk8NoDybA
+
+###
+GET http://localhost:3000/api/get/userDetails
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VybmFtZSI6ImthZWRtYWNhYmFudGlAZ21haWwuY29tIiwidXNlcklkIjoiNjZjNmY0MmNiOGEzOTYyYzU1OTY1ZDVjIiwiaWF0IjoxNzI0MzE0NjY5LCJleHAiOjE3MjQ0MDEwNjl9.dNwQvklDDI0h-fyAHnYfuWg1JxaflExE5OFk8NoDybA
 
 ###
 GET http://localhost:3000/api/get/jwt
-Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VybmFtZSI6Im15dXNlcm5hbWUiLCJ1c2VySWQiOiI2NmM0M2E1NzJhNjA3ZjA3N2M1OWUzMWYiLCJpYXQiOjE3MjQzMTAyODksImV4cCI6MTcyNDMxMTE4OX0.WoK3FVC0sgbQJm_KhbnDoubrmjO6CpSgWYWi0vaERN0
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VybmFtZSI6ImthZWRtYWNhYmFudGlAZ21haWwuY29tIiwidXNlcklkIjoiNjZjNmY0MmNiOGEzOTYyYzU1OTY1ZDVjIiwiaWF0IjoxNzI0MzE0NjY5LCJleHAiOjE3MjQ0MDEwNjl9.dNwQvklDDI0h-fyAHnYfuWg1JxaflExE5OFk8NoDybA
 
 ###
 DELETE http://localhost:3000/auth/logout
@@ -35,7 +39,7 @@ Content-Type: application/json
 ###
 
 POST http://localhost:3000/api/post/addTask
-Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VybmFtZSI6Im15dXNlcm5hbWUiLCJ1c2VySWQiOiI2NmM0M2E1NzJhNjA3ZjA3N2M1OWUzMWYiLCJpYXQiOjE3MjQyNTcyMTQsImV4cCI6MTcyNDI1ODExNH0.undl81vf4n9PPlmP-DSm2Gj04JYDmY8bRWKB0eQ7Lls
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VybmFtZSI6InRlc3QyQGdtYWlsLmNvbSIsInVzZXJJZCI6IjY2YzZmMjZlNjE3MDNjNDU4MjNlYzQyOSIsImlhdCI6MTcyNDMxNDIyMywiZXhwIjoxNzI0NDAwNjIzfQ.Pnw57101tVOKIUH5nXFmZ64h8KqIldJw3Y9-OlBT-go
 Content-Type: application/json
 
 {
@@ -43,7 +47,7 @@ Content-Type: application/json
     "taskDescription": "asd",
     "deadline": "2024-05-21",   
     "status": "In progress",
-    "user": "66c442ae9756e2542670278f" 
+    "user_id": "66c442ae9756e2542670278f" 
 }
 
 ###

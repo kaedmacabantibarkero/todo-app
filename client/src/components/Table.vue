@@ -4,6 +4,10 @@ import { ref, onMounted, computed } from 'vue';
 import EditModal from '../components/EditModal.vue';
 import AddTaskModal from '../components/AddTaskModal.vue'
 
+onMounted(() => {
+  getTask();
+});
+
 const showEditModal = ref(false);
 const showAddTaskModal = ref(false);
 const modalId = ref("");
@@ -12,11 +16,12 @@ const modalTaskDescription = ref("");
 const modalDate = ref("");
 const modalStatus = ref("");
 
-function clickNewTask(){
+function clickNewTask() {
   showAddTaskModal.value = true
+  showEditModal.value = false;
 }
 
-// Method to select a task and show the modal
+// function to slct a task and show the modal
 function selectTask(id, title, description, date, status) {
   showEditModal.value = true;
   if (title && date && status) {
@@ -30,14 +35,12 @@ function selectTask(id, title, description, date, status) {
   }
 }
 
-// Reactive data to hold tasks
+// holds the data for task
 const tableData = ref([]);
-
-// Function to fetch tasks from the API
+ 
 const getTask = async () => {
   try {
-    const token = localStorage.getItem('accessToken'); // Get the token from localStorage
-
+    const token = localStorage.getItem('accessToken');  
     if (!token) {
       throw new Error('No token found. Please log in.');
     }
@@ -47,17 +50,16 @@ const getTask = async () => {
     });
     tableData.value = response.data.map((task) => ({
       ...task,
-      date: new Date(task.deadline).toLocaleDateString(), // Format the date
+      date: new Date(task.deadline).toLocaleDateString(),  
     }));
   } catch (error) {
     console.error('Error fetching tasks:', error.message);
   }
 };
 
-// Call getTask when the component is mounted
-onMounted(() => {
+const refreshTasks = () => {
   getTask();
-});
+};
 
 // Search query
 const searchQuery = ref('');
@@ -71,7 +73,9 @@ const filteredData = computed(() => {
     item.status.toLowerCase().includes(query)
   );
 
-  if (selectedStatus.value !== 'All') {
+  if (selectedStatus.value === 'Current') {
+    filtered = filtered.filter(item => item.status === 'Not started' || item.status === 'In progress');
+  } else if (selectedStatus.value !== 'All') {
     filtered = filtered.filter(item => item.status === selectedStatus.value);
   }
 
@@ -92,8 +96,15 @@ const statusClass = (status) => {
   }
 };
 
+const statuses = ['Current', 'Not started', 'In progress', 'Done'];
+const selectedStatus = ref('Current');
+const selectStatus = (status) => {
+  selectedStatus.value = status;
+};
+
 // Handle radio button click
-const handleRadioClick = (item) => {
+const handleRadioClick = async (item) => {
+  showEditModal.value = false;
   if (window.confetti) {
     window.confetti({
       particleCount: 100,
@@ -101,21 +112,41 @@ const handleRadioClick = (item) => {
       origin: { x: 0.5, y: 0.5 },
     });
   }
+  try {
+    const token = localStorage.getItem('accessToken');
+    const userId = localStorage.getItem('userId');
+
+    if (!token) {
+      throw new Error('No token found. Please log in.');
+    }
+
+    const response = await axios.put(
+      `http://localhost:3000/api/put/updateTask/${modalId.value}`, 
+      {  
+        taskTitle: modalTitle.value,
+        taskDescription: modalTaskDescription.value,
+        deadline: "2024-08-20T00:00:00.000+00:00",
+        status:  "Done",
+        user: userId 
+      },
+      {  
+        headers: {'Authorization': `Bearer ${token}`}
+      }
+    );
+    refreshTasks()
+  } catch (error) {
+    alert("Error occurred: " + error.message);
+  }
 };
 
-const statuses = ['All', 'Not started', 'In progress', 'Done'];
-const selectedStatus = ref('All');
-const selectStatus = (status) => {
-  selectedStatus.value = status;
-};
+
 </script>
-
 
 <template>
   <div class="container flex flex-col gap-[1rem] default:px-[1rem] sm-tablet:px-[4rem]">
-    <EditModal v-if="showEditModal" :id="modalId" :title="modalTitle" :taskDescription="modalTaskDescription" :status="modalStatus" @closeEditModal="showEditModal=false"/>
+    <EditModal v-if="showEditModal" :id="modalId" :title="modalTitle" :taskDescription="modalTaskDescription" :status="modalStatus" @closeEditModal="showEditModal=false ; refreshTasks()"/>
     <teleport to="body">
-      <AddTaskModal v-if="showAddTaskModal" @closeAddTaskModal="showAddTaskModal=false" />
+      <AddTaskModal v-if="showAddTaskModal" @closeAddTaskModal="showAddTaskModal=false ; refreshTasks()" />
     </teleport>
     <div class="main-header flex flex justify-between items-center">
       <div class="flex flex-col gap-[1rem]">
@@ -133,7 +164,7 @@ const selectStatus = (status) => {
         </ul>
       </div>
       <div>
-        <button @click="clickNewTask"  class="default:hidden sm-tablet:block h-[38px] text-white px-[1rem] flex items-center justify-center gap-[.5rem] rounded-[5px] bg-[#e04c3c] hover:bg-[#c83c2c]">
+        <button @click="clickNewTask"   class="default:hidden sm-tablet:block h-[38px] text-white px-[1rem] flex items-center justify-center gap-[.5rem] rounded-[5px] bg-[#e04c3c] hover:bg-[#c83c2c]">
           <span  class="inline-block"><i class="fa-solid fa-plus pr-2"></i>New task</span>
         </button>
       </div>
@@ -141,27 +172,41 @@ const selectStatus = (status) => {
     <div class="search-container">
       <input type="text" class="search-input" placeholder="Search..." v-model="searchQuery">
     </div>
-    <div class="body flex flex-col gap-[1rem]">
-      <div class="row border rounded-[5px] cell flex  justify-between  " v-for="(item, index) in filteredData" :key="index" @click="selectTask(item._id, item.taskTitle, item.taskDescription, item.date, item.status)">
-        <div class="flex items-start  gap-[1rem]">
-          <input class="my-[.3rem]" type="radio" name="task" :id="`task-${index}`" @change="handleRadioClick(item)" />
-          <div class=" ">
+    <div class="body flex flex-col gap-[1rem] pb-[2rem]">
+      <div
+        class="row border rounded-[5px] cell flex justify-between"
+        v-for="(item, index) in filteredData"
+        :key="index"
+        @click="selectTask(item._id, item.taskTitle, item.taskDescription, item.date, item.status)"
+      >
+        <div class="flex items-start gap-[1rem]">
+          <input
+            v-if="item.status !== 'Done'"
+            class="my-[.3rem]"
+            type="radio"
+            name="task"
+            :id="`task-${index}`"
+            @change="handleRadioClick(item)"
+          />
+          <div>
             <div class="">{{ item.taskTitle }}</div>
             <div class="">{{ item.date }}</div>
-            <div class="" :class="statusClass(item.status)">{{ item.status }}</div>
+            <div :class="statusClass(item.status)">{{ item.status }}</div>
           </div>
         </div>
-        <span class="flex gap-[1rem] text-[#575757] ellipsis-container ">
+        <span class="flex gap-[1rem] text-[#575757] ellipsis-container">
           <i class="fa-regular fa-pen-to-square"></i>
           <i class="fa-regular fa-calendar"></i>
           <i class="fa-regular fa-comment"></i>
         </span>
       </div>
-      <button class="h-[38px] text-white px-[1rem]  rounded-[5px] bg-[#e04c3c] hover:bg-[#c83c2c] default:block sm-tablet:hidden">
-        <span class="inline-block"><i class="fa-solid fa-plus pr-2"></i>New task</span>
-      </button>
-
-    </div>
+      <button
+        @click="clickNewTask"
+        class="h-[38px] text-white px-[1rem] rounded-[5px] bg-[#e04c3c] hover:bg-[#c83c2c] default:block sm-tablet:hidden"
+      >
+      <span class="inline-block"><i class="fa-solid fa-plus pr-2"></i>New task</span>
+    </button>
+  </div>
   </div>
 </template>
 

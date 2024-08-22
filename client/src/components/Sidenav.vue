@@ -1,20 +1,34 @@
- 
-
-<script setup>
-import { ref } from 'vue'; 
+ <script setup>
+import { ref, onMounted, watch } from 'vue'; 
 import { useRouter } from 'vue-router';
 import axios from 'axios';
+import { useUserDetails } from '../composables/userDetails'; // Import the composable
+
 const router = useRouter();
+const { userDetails, error, loading, fetchUserDetails } = useUserDetails(); // Destructure the composable's properties
+
+const username = ref('');
+const id = ref('');
+onMounted(async () => {
+  try {
+    await fetchUserDetails(); 
+    const { _id: fetchedId, username: fetchedUsername } = userDetails.value; 
+    username.value = fetchedUsername;  
+    id.value = fetchedId; 
+  } catch (err) {
+    console.error('Error fetching user details:', err.message);
+  }
+});
+ 
 
 const getJWT = async () => {
   try {
-    const token = localStorage.getItem('accessToken'); // Get the token from localStorage
+    const token = localStorage.getItem('accessToken'); // get the token from localStorage
 
     if (!token) {
       throw new Error('No token found. Please log in.');
     }
 
-    // Fetch the JWT from the endpoint
     const response = await axios.get('http://localhost:3000/api/get/jwt', {
       headers: { 'Authorization': `Bearer ${token}` },
     });
@@ -23,21 +37,20 @@ const getJWT = async () => {
     return jwt;
   } catch (error) {
     console.error('Error fetching JWT:', error.message);
-    throw error; // Rethrow the error to handle it in the calling function if needed
+    throw error;  
   }
 };
 
 const logout = async () => {
   try {
-    const jwt = await getJWT(); // Fetch the JWT using getJWT function
+    const jwt = await getJWT();  
 
-    // Send a request to delete the JWT
     await axios.delete('http://localhost:3000/auth/logout', {
       headers: { 'Authorization': `Bearer ${jwt}` },
       data: { jwt }, // Include the JWT in the request body
     });
 
-    // Optionally, clear the local storage token or handle post-logout behavior
+    //clear the local storage token or handle post-logout behavior
     localStorage.removeItem('accessToken');
     router.push({
         name: 'login', 
@@ -51,13 +64,13 @@ const logout = async () => {
   <section class="sidenav-wrapper bg-[#fcfaf8] fixed flex flex-col h-[100vh] w-[15rem] border-r default:hidden tablet:block ">
     <div class="sidenav m-[1rem] top-0 left-0 text-white flex flex-col justify-between h-full ">
        <ul>
-        <router-link class="cursor-pointer flex items-center gap-5 p-2 rounded-md text-inherit no-underline max-h-[32px]" :to="`/`">
-           <img class="logo h-[30px] w-[30px] rounded-[50%]" src="../assets/profile.jpg" alt="Logo" draggable="false">
-          <label class="text-[#575757]">Kaed Macabanti</label>
-        </router-link>
-
+        <div class="cursor-pointer flex items-center gap-5 p-2 rounded-md text-inherit no-underline max-h-[32px]   overflow-hidden">
+          <img class="logo h-[30px] w-[30px] rounded-[50%]" src="../assets/profile.jpg" alt="Logo" draggable="false">
+          <label class="text-[#575757] truncate whitespace-nowrap">{{ username }}</label>
+        </div>
+        
         <br>
-        <router-link class="menu-item max-h-[32px]" :to="`/`">
+        <router-link class="menu-item max-h-[32px]" :to="`/${id}`">
             <i class="fa-solid fa-list-check"></i>
             <label>Task List</label>
         </router-link>

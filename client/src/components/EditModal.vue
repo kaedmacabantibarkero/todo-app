@@ -79,10 +79,8 @@ const props = defineProps({
 const localTitle = ref(props.title);
 const localTaskDescription = ref(props.taskDescription);
 
-// Create a ref for the selected status
 const selected = ref(props.status);
 
-// Define emits
 const emit = defineEmits(['closeEditModal']);
 
 // Watch for changes in the props and update local state
@@ -99,29 +97,27 @@ watch(() => props.status, (newStatus) => {
  
 const updateTask = async () => {
   try {
-    const token = localStorage.getItem('accessToken'); // Get the token from localStorage
-    const userId = localStorage.getItem('userId'); // Get the token from localStorage
+    const token = localStorage.getItem('accessToken'); 
+    const userId = localStorage.getItem('userId'); 
 
     if (!token) {
       throw new Error('No token found. Please log in.');
     }
 
     const response = await axios.put(
-      `http://localhost:3000/api/put/updateTask/${props.id}`, // URL with task ID
-      { // Data payload
+      `http://localhost:3000/api/put/updateTask/${props.id}`,
+      {
         taskTitle: localTitle.value,
         taskDescription: localTaskDescription.value,
         deadline: "2024-08-20T00:00:00.000+00:00",
         status: selected.value,
         user: userId 
       },
-      { // Config object
+      { 
         headers: {'Authorization': `Bearer ${token}`}
       }
     );
-
-    alert("Success update");
-    console.log(response.data);
+    emit('closeEditModal'); 
   } catch (error) {
     alert("Error occurred: " + error.message);
   }
@@ -129,16 +125,15 @@ const updateTask = async () => {
 
 const isActive = ref(false);
 
-onMounted(() => {
-  // Activate the animation slightly after the component is mounted
+onMounted(() => { // Activate the animation slightly after the component is mounted
   setTimeout(() => {
     isActive.value = true;
-  }, 10); // A small delay, e.g., 10ms
+  }, 10); 
 });
 </script>
 
 <style scoped>
 .slide-in {
-  transition: transform 0.5s ease-in-out; /* Only transition the transform */
+  transition: transform 0.5s ease-in-out;  
 }
 </style>

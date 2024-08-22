@@ -35,6 +35,43 @@ const togglePasswordVisibility = () => {
 
 const errorMessage = ref("Please fill out email and password")
 const showErrorMessage = ref(false)
+
+// Function to handle login
+const login = async () => { 
+  if (username.value !== '' && password.value !== '') {
+    try {
+      const response = await axios.post('http://localhost:3000/auth/login', {
+        username: username.value,
+        password: password.value,
+      });
+      const { accessToken, userId } = response.data;
+      localStorage.setItem('accessToken', accessToken);
+      localStorage.setItem('userId', userId);
+      console.log("login success")
+      router.push({
+        name: 'home',
+        params: { id: userId }
+      });
+    } catch (error) {
+      if (error.response && error.response.data) { 
+        showErrorMessage.value = true;
+        errorMessage.value = error.response.data.msg;
+        setTimeout(() => {
+          showErrorMessage.value = false;
+        }, 3000);
+      } else { 
+        console.log("Error occurred: " + error.message);
+      }
+    } 
+  } else {
+    showErrorMessage.value = true;
+    setTimeout(() => {
+      showErrorMessage.value = false;
+    }, 3000); 
+  }
+};
+
+
 // Function to handle sign up
 const signUp = async () => {
   if (isMinLength.value && isValidThreeConditions.value) {
@@ -43,12 +80,7 @@ const signUp = async () => {
         username: username.value,
         password: password.value,
       }); 
-      router.push({
-        name: 'home',
-        params: {
-          id: '123'
-        }
-      });
+      await login();
     } catch (error) {
       // Check if the error has a response from the server
       if (error.response && error.response.data) { 
@@ -133,11 +165,11 @@ const signUp = async () => {
 
 <style scoped>
 .text-green-600 {
-  color: #047857; /* Tailwind green-600 */
+  color: #047857;  
 }
 
 .text-gray-600 {
-  color: #4B5563; /* Tailwind gray-600 */
+  color: #4B5563;  
 }
 
  

@@ -10,7 +10,7 @@ const router = express.Router();
 let refreshTokens = [];
 // Function to generate access token
 function generateAccessToken(user) {
-return jwt.sign(user, process.env.ACCESS_TOKEN_SECRET, { expiresIn: '15m' }); // Shorter expiry for access tokens
+return jwt.sign(user, process.env.ACCESS_TOKEN_SECRET, { expiresIn: '1d' }); // Shorter expiry for access tokens
 }
 
 // Function to generate refresh token
@@ -89,7 +89,5 @@ router.post('/auth/login', async (req, res) => {
     res.status(500).send('Server error');
   }
 });
-
-
 
 module.exports = router;

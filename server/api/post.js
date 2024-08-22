@@ -8,7 +8,6 @@ const authenticateToken = require('../middleware/authMiddleware');
 router.post('/api/post/signup', async (req, res) => {
   try {
     const { username, password } = req.body;
-
     // Check if the username already exists
     let user = await User.findOne({ username });
     if (user) {
@@ -19,7 +18,6 @@ router.post('/api/post/signup', async (req, res) => {
       username,
       password,
     });
-
     await user.save();
     res.status(201).json({ msg: 'User created successfully' });
   } catch (err) {
@@ -28,12 +26,9 @@ router.post('/api/post/signup', async (req, res) => {
   }
 });
 
-
 router.post('/api/post/addTask', authenticateToken, async (req, res) => {
   try {
- 
     const { taskTitle, taskDescription, deadline, status, user_id} = req.body;
-
     // Create a new task
     const task = new Task({
       taskTitle,
@@ -42,7 +37,6 @@ router.post('/api/post/addTask', authenticateToken, async (req, res) => {
       status,
       user_id
     });
-
     await task.save();
     res.status(201).json({ msg: 'Task created successfully' });
   } catch (err) {
@@ -50,6 +44,5 @@ router.post('/api/post/addTask', authenticateToken, async (req, res) => {
     res.status(500).send('Server error');
   }
 });
-
 
 module.exports = router;
