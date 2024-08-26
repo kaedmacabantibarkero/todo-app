@@ -26,26 +26,7 @@ router.get('/api/get/userDetails', authenticateToken, async (req, res) => {
   }
 });
 
-// GET endpoint to fetch all tasks for a specific user
-router.get('/api/get/jwt', authenticateToken, async (req, res) => {
-  try {
-    const userId = req.user.userId
-    // check if userId is valid
-    if (!userId.match(/^[0-9a-fA-F]{24}$/)) {
-      return res.status(400).json({ msg: 'Invalid user ID' });
-    }
-    // fetch the session for the user
-    const session = await Session.findOne({ user_id: userId });
-    if (!session) {
-      return res.status(404).json({ msg: 'No session found for this user' });
-    }
-    // Return the JWT
-    res.status(200).json({ jwt: session.jwt });
-  } catch (err) {
-    console.error(err.message);
-    res.status(500).send('Server error');
-  }
-});
+ 
 
 // GET endpoint to fetch all tasks for a specific user
 router.get('/api/get/getTask', authenticateToken, async(req, res) => {
@@ -67,4 +48,21 @@ router.get('/api/get/getTask', authenticateToken, async(req, res) => {
   }
 });
 
+// GET endpoint to fetch all tasks for a specific user
+router.get('/api/get/jwt', async (req, res) => {
+  try {
+    const userId = req.body.userId
+ 
+    // fetch the session for the user
+    const session = await Session.findOne({ user_id: userId });
+    if (!session) {
+      return res.status(404).json({ msg: 'No session found for this user' });
+    }
+    // Return the JWT
+    res.status(200).json({ jwt: session.jwt });
+  } catch (err) {
+    console.error(err.message);
+    res.status(500).send('Server error');
+  }
+});
 module.exports = router;

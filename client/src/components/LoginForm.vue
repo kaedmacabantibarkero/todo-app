@@ -7,8 +7,7 @@ const username = ref('');
 const password = ref('');  
 const errorMessage = ref("Please fill out email and password");
 const showErrorMessage = ref(false);
-
-// Reactive variable to control password visibility
+ 
 const passwordVisible = ref(false);
 
 // Function to toggle the visibility of the password

@@ -1,6 +1,6 @@
 <script setup>
 import axios from 'axios';
-import { ref, onMounted, computed } from 'vue';
+import { ref, reactive, onMounted, computed } from 'vue';
 import EditModal from '../components/EditModal.vue';
 import AddTaskModal from '../components/AddTaskModal.vue'
 
@@ -8,28 +8,29 @@ onMounted(() => {
   getTask();
 });
 
+const refreshTasks = () => {
+  getTask();
+};
+
 const showEditModal = ref(false);
 const showAddTaskModal = ref(false);
-const modalId = ref("");
-const modalTitle = ref("");
-const modalTaskDescription = ref("");
-const modalDate = ref("");
-const modalStatus = ref("");
-
+    
 function clickNewTask() {
   showAddTaskModal.value = true
   showEditModal.value = false;
 }
 
+const modalData = reactive({ id: "", title: "", description: "", deadline: "", status: ""})
+
 // function to slct a task and show the modal
 function selectTask(id, title, description, date, status) {
   showEditModal.value = true;
   if (title && date && status) {
-    modalId.value = id;
-    modalTitle.value = title;
-    modalTaskDescription.value = description;
-    modalDate.value = date;
-    modalStatus.value = status;
+    modalData.id= id;
+    modalData.title= title;
+    modalData.description= description;
+    modalData.deadline= date;
+    modalData.status = status;
   } else {
     alert('Invalid task details');
   }
@@ -57,10 +58,6 @@ const getTask = async () => {
   }
 };
 
-const refreshTasks = () => {
-  getTask();
-};
-
 // Search query
 const searchQuery = ref('');
 
@@ -75,7 +72,7 @@ const filteredData = computed(() => {
 
   if (selectedStatus.value === 'Current') {
     filtered = filtered.filter(item => item.status === 'Not started' || item.status === 'In progress');
-  } else if (selectedStatus.value !== 'All') {
+  } else{
     filtered = filtered.filter(item => item.status === selectedStatus.value);
   }
 
@@ -121,11 +118,11 @@ const handleRadioClick = async (item) => {
     }
 
     const response = await axios.put(
-      `http://localhost:3000/api/put/updateTask/${modalId.value}`, 
+      `http://localhost:3000/api/put/updateTask/${modalData.id}`, 
       {  
-        taskTitle: modalTitle.value,
-        taskDescription: modalTaskDescription.value,
-        deadline: "2024-08-20T00:00:00.000+00:00",
+        taskTitle: modalData.title,
+        taskDescription: modalData.description,
+        deadline: modalData.deadline,
         status:  "Done",
         user: userId 
       },
@@ -139,12 +136,11 @@ const handleRadioClick = async (item) => {
   }
 };
 
-
 </script>
 
 <template>
   <div class="container flex flex-col gap-[1rem] default:px-[1rem] sm-tablet:px-[4rem]">
-    <EditModal v-if="showEditModal" :id="modalId" :title="modalTitle" :taskDescription="modalTaskDescription" :status="modalStatus" @closeEditModal="showEditModal=false ; refreshTasks()"/>
+    <EditModal v-if="showEditModal" :id="modalData.id" :title="modalData.title" :taskDescription="modalData.description" :status="modalData.status" @closeEditModal="showEditModal=false ; refreshTasks()"/>
     <teleport to="body">
       <AddTaskModal v-if="showAddTaskModal" @closeAddTaskModal="showAddTaskModal=false ; refreshTasks()" />
     </teleport>
