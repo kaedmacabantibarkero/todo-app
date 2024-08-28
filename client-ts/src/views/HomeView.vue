@@ -1,7 +1,6 @@
-<script setup>
+<script setup lang="ts">
 import Table from '../components/Table.vue'
-import Sidenav from '../components/Sidenav.vue' 
-import AddTaskModal from '../components/AddTaskModal.vue'
+import Sidenav from '../components/Sidenav.vue'  
 import Topnav from '../components/Topnav.vue' 
 import { ref, onMounted } from 'vue'
 import { useRoute, useRouter } from 'vue-router'

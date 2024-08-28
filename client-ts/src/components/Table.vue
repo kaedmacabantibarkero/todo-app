@@ -1,9 +1,9 @@
-<script setup>
+<script setup lang="ts">
 import axios from 'axios';
 import { ref, reactive, onMounted, computed } from 'vue';
-import EditModal from '../components/EditModal.vue';
-import AddTaskModal from '../components/AddTaskModal.vue'
-
+import EditModal from './EditModal.vue';
+import AddTaskModal from './AddTaskModal.vue';
+import { Task } from '../types/Tasks';
 onMounted(() => {
   getTask();
 });
@@ -20,10 +20,11 @@ function clickNewTask() {
   showEditModal.value = false;
 }
 
-const modalData = reactive({ id: "", title: "", description: "", deadline: "", status: ""})
+interface ModalData {id: string;title: string;description: string;deadline: string;status: string;}
+const modalData = reactive<ModalData>({id: "",title: "",description: "",deadline: "",status: ""});
 
 // function to slct a task and show the modal
-function selectTask(id, title, description, date, status) {
+function selectTask(id:string, title:string, description:string, date:string, status:string) {
   showEditModal.value = true;
   if (title && date && status) {
     modalData.id= id;
@@ -37,23 +38,22 @@ function selectTask(id, title, description, date, status) {
 }
 
 // holds the data for task
-const tableData = ref([]);
- 
+const tableData = ref<Task[]>([]);
 const getTask = async () => {
   try {
     const token = localStorage.getItem('accessToken');  
     if (!token) {
       throw new Error('No token found. Please log in.');
     }
- 
     const response = await axios.get('http://localhost:3000/api/get/getTask', {
       headers: { 'Authorization': `Bearer ${token}` },
     });
-    tableData.value = response.data.map((task) => ({
+    tableData.value = response.data.map((task:Task) => ({
       ...task,
       date: new Date(task.deadline).toLocaleDateString(),  
     }));
-  } catch (error) {
+    console.log(tableData.value)
+  } catch (error: any) {
     console.error('Error fetching tasks:', error.message);
   }
 };
@@ -66,7 +66,7 @@ const filteredData = computed(() => {
   const query = searchQuery.value.toLowerCase();
   let filtered = tableData.value.filter((item) =>
     item.taskTitle.toLowerCase().includes(query) ||
-    item.date.toLowerCase().includes(query) ||
+    item.deadline.toLowerCase().includes(query) ||
     item.status.toLowerCase().includes(query)
   );
 
@@ -86,7 +86,7 @@ const showNoPendingTask = computed(() => {
 
 
 // Return status class based on the status
-const statusClass = (status) => {
+const statusClass = (status:string) => {
   switch (status) {
     case 'Not started':
       return 'status-not-started';
@@ -102,12 +102,12 @@ const statusClass = (status) => {
 
 const statuses = ['Current', 'Not started', 'In progress', 'Done'];
 const selectedStatus = ref('Current');
-const selectStatus = (status) => {
+const selectStatus = (status:string) => {
   selectedStatus.value = status;
 };
 
 // Handle radio button click
-const handleRadioClick = async (item) => {
+const handleRadioClick = async (item:any) => {
   showEditModal.value = false;
   if (window.confetti) {
     window.confetti({
@@ -138,7 +138,7 @@ const handleRadioClick = async (item) => {
       }
     );
     refreshTasks()
-  } catch (error) {
+  } catch (error: any) {
     alert("Error occurred: " + error.message);
   }
 };
@@ -183,7 +183,7 @@ const handleRadioClick = async (item) => {
         class="row border rounded-[5px] cell flex justify-between"
         v-for="(item, index) in filteredData"
         :key="index"
-        @click="selectTask(item._id, item.taskTitle, item.taskDescription, item.date, item.status)"
+        @click="selectTask(item._id, item.taskTitle, item.taskDescription, item.deadline, item.status)"
       >
         <div class="flex items-start gap-[1rem]">
           <input
@@ -196,7 +196,7 @@ const handleRadioClick = async (item) => {
           />
           <div>
             <div class="">{{ item.taskTitle }}</div>
-            <div class="">{{ item.date }}</div>
+            <div class="">{{ item.deadline }}</div>
             <div :class="statusClass(item.status)">{{ item.status }}</div>
           </div>
         </div>

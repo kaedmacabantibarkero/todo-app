@@ -1,5 +1,6 @@
 # Ignore node_modules in the client folder
 client/node_modules/
+client-ts/node_modules/
 
 # Ignore node_modules in the server folder
 server/node_modules/
