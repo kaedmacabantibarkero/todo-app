@@ -2,7 +2,7 @@
 import { ref, computed } from 'vue';
 import axios from 'axios';
 import {useRouter} from 'vue-router'
-
+import { getAuth, createUserWithEmailAndPassword, GoogleAuthProvider, signInWithPopup } from "firebase/auth";
 const router = useRouter()
 
 const username = ref('');
@@ -36,63 +36,30 @@ const togglePasswordVisibility = () => {
 const errorMessage = ref("Please fill out email and password")
 const showErrorMessage = ref(false)
 
-// Function to handle login
-const login = async () => { 
-  if (username.value !== '' && password.value !== '') {
-    try {
-      const response = await axios.post('http://localhost:3000/auth/login', {
-        username: username.value,
-        password: password.value,
-      });
-      const { accessToken, userId } = response.data;
-      localStorage.setItem('accessToken', accessToken);
-      localStorage.setItem('userId', userId);
-      console.log("login success")
-      router.push({
-        name: 'home',
-        params: { id: userId }
-      });
-    } catch (error:any) {
-      if (error.response && error.response.data) { 
-        showErrorMessage.value = true;
-        errorMessage.value = error.response.data.msg;
-        setTimeout(() => {
-          showErrorMessage.value = false;
-        }, 3000);
-      } else { 
-        console.log("Error occurred: " + error.message);
-      }
-    } 
-  } else {
-    showErrorMessage.value = true;
-    setTimeout(() => {
-      showErrorMessage.value = false;
-    }, 3000); 
-  }
-};
-
-
 // Function to handle sign up
 const signUp = async () => {
   if (isMinLength.value && isValidThreeConditions.value) {
-    try {
-      const response = await axios.post('http://localhost:3000/api/post/signup', {
-        username: username.value,
-        password: password.value,
-      }); 
-      await login();
-    } catch (error:any) {
-      // Check if the error has a response from the server
-      if (error.response && error.response.data) { 
-        showErrorMessage.value= true
-        errorMessage.value = error.response.data.msg;
-        setTimeout(() => {
-          showErrorMessage.value = false;
-        }, 3000);
-      } else { 
-        console.log("Error occurred: " + error.message);
-      }
-    }
+    const auth = getAuth();
+    createUserWithEmailAndPassword(auth, username.value, password.value)
+      .then((userCredential) => {
+        // Signed up 
+        const user = userCredential.user;
+        router.push('/feed')
+        // ...
+      })
+      .catch((error) => {
+        // error.code; // error.message; // these are the error codes 
+        switch (error.code) {
+          case "auth/email-already-in-use":
+            errorMessage.value = "Account already exist";
+            showErrorMessage.value = true;
+            break;
+          default:
+            errorMessage.value = "An unknown error occurred. Please try again later.";
+            showErrorMessage.value = true;
+            break;
+        }
+      });
   } else {
     showErrorMessage.value= true
     setTimeout(() => {
@@ -100,11 +67,21 @@ const signUp = async () => {
     }, 3000);
   }
 };
+
+// Function to handle sign up
+const signUpWithGoogle = async () => {
+ const provider = new GoogleAuthProvider() 
+ signInWithPopup(getAuth(), provider).then((result)=>{
+  console.log(result.user)
+  router.push('/feed')
+ }).catch((error)=>{
+  console.log(error)
+ })
+};
 </script>
 
-
 <template>
-  <div :class="[hasPassword ? 'h-[760px]' : 'h-[540px]']" class="h-[540px] w-[400px] bg-white default:box-shadow-none sm-tablet:shadow-fading">
+  <div class="w-[400px] bg-white default:box-shadow-none sm-tablet:shadow-fading">
     <div class="w-full h-[200px] p-[40px] flex flex-col items-center justify-center gap-[1rem]">
       <img class="h-[80px] mt-[4rem]" src="../assets/Todoist_logo.png" alt="">
       <h2 class="text-[25px]">Sign up new account</h2>
@@ -153,6 +130,10 @@ const signUp = async () => {
         </div>
       </div>
       <button @click="signUp" class="h-[52px] px-[16px] bg-[#e04c3c] hover:bg-[#c83c2c] text-white mt-[24px]">Continue</button>
+      <button @click="signUpWithGoogle" class="h-[52px] px-[16px] mt-[24px] flex items-center justify-center gap-[.5rem] bg-white text-white  text-gray-600 border border-gray-600 hover:bg-gray-200">
+        <img class="logo h-[30px] w-[30px]" src="../assets/google-logo.png" alt="Logo" draggable="false">
+        Google
+      </button>
       <span class="flex gap-[.5rem] mt-[1rem]">
         <p>Already have an account?</p>
         <router-link to="/login" class="text-[#047cb0] font-medium">

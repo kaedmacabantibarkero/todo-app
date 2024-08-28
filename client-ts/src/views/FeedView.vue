@@ -9,7 +9,11 @@ import { useRoute, useRouter } from 'vue-router'
 
 <template>
   <main class="home-view relative overflow-y-auto h-[full]">
-    welcome to home
+    <Topnav/>
+    <Sidenav  />
+    <div class="section tablet:ml-[15rem] default:ml-[0rem] mt-[4rem] relative">
+      <Table />
+    </div>
   </main>
   
 </template>

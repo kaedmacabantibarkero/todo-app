@@ -1,64 +1,33 @@
 <script setup lang="ts">
 import { ref, onMounted, watch } from 'vue'; 
 import { useRouter } from 'vue-router';
-import axios from 'axios';
-import { useUserDetails } from '../composables/userDetails'; // Import the composable
-
+import axios from 'axios'; 
 const router = useRouter();
+import { useUserDetails } from '../composables/userDetails'; // Import the composable
+import { getAuth, onAuthStateChanged , signOut} from "firebase/auth"; 
 const { userDetails, error, loading, fetchUserDetails } = useUserDetails(); // Destructure the composable's properties
 
 const username = ref('');
 const id = ref('');
-onMounted(async () => {
-  try {
-    await fetchUserDetails(); 
-    const { _id: fetchedId, username: fetchedUsername } = userDetails.value; 
-    username.value = fetchedUsername;  
-    id.value = fetchedId; 
-  } catch (error:any) {
-    console.error('Error fetching user details:', error.message);
-  }
-});
- 
 
-const getJWT = async () => {
-  try {
-    const token = localStorage.getItem('accessToken'); // get the token from localStorage
-
-    if (!token) {
-      throw new Error('No token found. Please log in.');
+const isLoggedIn = ref(false)
+let auth:any
+onMounted( () => {
+  auth = getAuth();
+  onAuthStateChanged(auth, (user)=> {
+    if (user){
+      isLoggedIn.value = true
+    }else{
+      isLoggedIn.value = false
     }
-
-    const response = await axios.get('http://localhost:3000/api/get/jwt', {
-      headers: { 'Authorization': `Bearer ${token}` },
-    });
-
-    const jwt = response.data.jwt; // Extract the JWT from the response
-    return jwt;
-  } catch (error:any) {
-    console.error('Error fetching JWT:', error.message);
-    throw error;  
-  }
-};
-
-const logout = async () => {
-  try {
-    const jwt = await getJWT();  
-
-    await axios.delete('http://localhost:3000/auth/logout', {
-      headers: { 'Authorization': `Bearer ${jwt}` },
-      data: { jwt }, // Include the JWT in the request body
-    });
-
-    //clear the local storage token or handle post-logout behavior
-    localStorage.removeItem('accessToken');
-    router.push({
-        name: 'login', 
-      });
-  } catch (error:any) {
-    console.error('Error during logout:', error.message);
-  }
-};
+  })
+});
+  
+ const logout = () =>{
+  signOut(auth).then(()=>{
+    router.push("/")
+  })
+ }
 </script>
 <template>
   <section class="sidenav-wrapper bg-[#fcfaf8] fixed flex flex-col h-[100vh] w-[15rem] border-r default:hidden tablet:block ">

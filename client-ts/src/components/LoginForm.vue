@@ -1,59 +1,66 @@
-<script setup lang="ts">
+<script setup>
 import { ref } from 'vue';
+import { getAuth, signInWithEmailAndPassword } from "firebase/auth";
 import { useRouter } from 'vue-router';
 import axios from 'axios'; 
 const router = useRouter();
 const username = ref('');
 const password = ref('');  
-const errorMessage = ref("Please fill out email and password");
+const errorMessage = ref('');
 const showErrorMessage = ref(false);
- 
 const passwordVisible = ref(false);
+
+const login = async () => {  
+  const auth = getAuth();
+  signInWithEmailAndPassword(auth, username.value, password.value)
+    .then((userCredential) => {
+      // Signed in 
+      const authenticatedUser = userCredential.user;
+      console.log(authenticatedUser)
+      router.push('/feed') 
+    })
+    .catch((error) => {
+    // error.code; // error.message; // these are the error codes
+    switch (error.code) {
+      case "auth/invalid-credential":
+        errorMessage.value = "Invalid credentials. Please try again.";
+        showErrorMessage.value = true;
+        break;
+      case "auth/invalid-email":
+        errorMessage.value = "Please enter a valid email address.";
+        showErrorMessage.value = true;
+        break;
+      case "auth/missing-password":
+        errorMessage.value = "Please enter your password.";
+        showErrorMessage.value = true;
+        break;
+      case "auth/user-not-found":
+        errorMessage.value = "No account found with this email.";
+        showErrorMessage.value = true;
+        break;
+      case "auth/wrong-password":
+        errorMessage.value = "Incorrect password. Please try again.";
+        showErrorMessage.value = true;
+        break;
+      default:
+        errorMessage.value = "An unknown error occurred. Please try again later.";
+        showErrorMessage.value = true;
+        break;
+    }
+  });
+}  
 
 // Function to toggle the visibility of the password
 const togglePasswordVisibility = () => {
   passwordVisible.value = !passwordVisible.value;
 };
-
-const login = async () => { 
-  if (username.value !== '' && password.value !== '') {
-    try {
-      const response = await axios.post('http://localhost:3000/auth/login', {
-        username: username.value,
-        password: password.value,
-      });
-      const { accessToken, userId } = response.data;
-      localStorage.setItem('accessToken', accessToken);
-      localStorage.setItem('userId', userId); 
-      router.push({
-        name: 'home',
-        params: { id: userId }
-      });
-    } catch (error: any) {
-      if (error.response && error.response.data) { 
-        showErrorMessage.value = true;
-        errorMessage.value = error.response.data.msg;
-        setTimeout(() => {
-          showErrorMessage.value = false;
-        }, 3000);
-      } else { 
-        console.log("Error occurred: " + error.message);
-      }
-    } 
-  } else {
-    showErrorMessage.value = true;
-    setTimeout(() => {
-      showErrorMessage.value = false;
-    }, 3000); 
-  }
-};
 </script>
 
 <template>
-  <div class="h-[540px] w-[400px] bg-white default:box-shadow-none sm-tablet:shadow-fading">
+  <div class=" w-[400px] bg-white default:box-shadow-none sm-tablet:shadow-fading">
     <div class="w-full h-[200px] p-[40px] flex flex-col items-center justify-center gap-[1rem]">
       <img class="h-[80px] mt-[4rem]" src="../assets/Todoist_logo.png" alt="">
-      <h2 class="text-[25px]">Welcome</h2>
+      <h2 class="text-[25px]">Welcome back</h2>
     </div>
     <div :class="[showErrorMessage ? 'p-[40px] pb-[40px] pt-[20px]': 'p-[40px]']" class="w-full h-full flex flex-col  ">
       <div class="flex flex-col gap-[1rem]">
